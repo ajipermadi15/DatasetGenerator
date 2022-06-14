@@ -1,3 +1,6 @@
+from multiprocessing.reduction import duplicate
+
+from torch import frac
 from datasetGenerator import DatasetGenerator, path_dictionary
 import numpy as np
 import re
@@ -12,7 +15,8 @@ configDataset = {
                 'inconsistent': {'columns': ['marital_status', 'last_education', 'email', 'age'],
                                     'proportions': [0.2, 0.3, 0.1, 0.4]},
                 'outlier': {'columns': ['age'],
-                                    'proportions': [0.1]}
+                                    'proportions': [0.1]},
+                'duplicate_data': {'proportion': 0.05}
                 }
 configInconsistent = {
                         'marital_status': {'single':['lajang', 'belum menikah'],
@@ -70,6 +74,13 @@ class dirtyDatasetGenerator(DatasetGenerator):
                     apply(lambda x: random.choice([random.randint(lower_limit,upper_limit)*x, -x]))
         return dataframe
 
+    def duplicateData(self, dataframe, proportion):
+        n_duplicate = int(self.rows * proportion)
+        idx_duplicate = self.random.sample(list(dataframe.index), k=n_duplicate)
+        dataframe = dataframe.append(dataframe.loc[idx_duplicate])
+        dataframe = dataframe.sample(frac=1).reset_index(drop=True)
+        return dataframe
+
     def generateDataset(self, rows=100, last_name=True, configDataset=configDataset):
         dummyDataset = super().generateDataset(rows, last_name)
         #print(dummyDataset.info())
@@ -88,10 +99,13 @@ class dirtyDatasetGenerator(DatasetGenerator):
         inconsistent_dataframe = self.inconsistent(dummyDataset.loc[:,inconsistent_columns], inconsistent_proportions)
         dummyDataset.loc[:,inconsistent_columns] = inconsistent_dataframe
         #
+        duplicate_proportion = configDataset['duplicate_data']['proportion']
+        dummyDataset = self.duplicateData(dummyDataset, duplicate_proportion)
+        #print(len(dummyDataset))
         #print(dummyDataset[['first_name', 'last_name', 'email', 'age', 'income_per_month']])
         #print(dummyDataset['age'].dtype)
         return dummyDataset
 
 generator = dirtyDatasetGenerator(seed=101)
-dataset = generator.generateDataset(rows=150)
+dataset = generator.generateDataset(rows=300)
 dataset.to_csv('output/dataset_survey.csv')
