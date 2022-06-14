@@ -1,5 +1,3 @@
-from operator import index
-from mysqlx import Column
 import pandas as pd
 import random
 import numpy as np

@@ -1,6 +1,3 @@
-from multiprocessing.reduction import duplicate
-
-from torch import frac
 from datasetGenerator import DatasetGenerator, path_dictionary
 import numpy as np
 import re
@@ -10,10 +7,10 @@ column_list = ['first_name', 'last_name', 'sex', 'nation', 'adress', 'province_c
                 'postal_code', 'email', 'birthday', 'age', 'marital_status',
                 'income_per_month', 'last_education']
 configDataset = {
-                'missing_values':{'columns': ['last_name', 'province_code', 'birthday', 'sex'],
+                'missing_values':{'columns': ['last_name', 'province_code', 'age', 'sex'],
                                     'proportions': [0.3, 0.88, 0.3, 0.2]},
                 'inconsistent': {'columns': ['marital_status', 'last_education', 'email', 'age'],
-                                    'proportions': [0.2, 0.3, 0.1, 0.4]},
+                                    'proportions': [0.2, 0.3, 0.1, 0.1]},
                 'outlier': {'columns': ['age'],
                                     'proportions': [0.1]},
                 'duplicate_data': {'proportion': 0.05}
@@ -25,7 +22,7 @@ configInconsistent = {
                         'last_education': {"High school graduate": ['SMA', 'SMK'],
                                             "Bachelor's degree": ['S1', 'S-1'],
                                             "Master's degree": ['S2', 'S-2'], 
-                                            "Doctorate degree": ['S3', "S-3"]}
+                                            "Doctorate degree": ['S3', 'S-3']}
                     }
 
 class dirtyDatasetGenerator(DatasetGenerator):
